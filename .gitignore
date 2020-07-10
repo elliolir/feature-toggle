@@ -2,3 +2,7 @@
 .env
 node_modules
 build
+# Serverless directories
+.serverless
+jspm_packages
+.build
