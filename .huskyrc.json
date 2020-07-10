@@ -1,5 +1,10 @@
 {
-  "hooks": {
-    "pre-push": "npm run lint:fix"
+  "husky": {
+    "hooks": {
+      "pre-push": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*": ["eslint --fix", "prettier --write"]
   }
 }
