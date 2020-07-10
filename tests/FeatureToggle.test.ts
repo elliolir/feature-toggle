@@ -1,4 +1,4 @@
-import FeatureToggle from "../src/FeatureToggle";
+import {FeatureToggleClientInterface, getFeatureToggle} from "../src/FeatureToggle";
 
 describe("FeatureToggle", () => {
     it("Should run tests lol", () => {
