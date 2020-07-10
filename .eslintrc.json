@@ -19,7 +19,6 @@
     "prettier/@typescript-eslint"
   ],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "off",
     "react/jsx-filename-extension": [1, { "extensions": [".jsx", ".tsx"] }],
     "import/extensions": "off",
     "spaced-comment": [2, "always", { "markers": ["/"] }]
