@@ -1,6 +1,6 @@
 import {APIGatewayProxyResult} from "aws-lambda"
 
-const getResponse = (statusCode: number, body: any): APIGatewayProxyResult => ({
+const getResponse = (statusCode: number, body: unknown): APIGatewayProxyResult => ({
     statusCode,
     body: JSON.stringify(
         body,

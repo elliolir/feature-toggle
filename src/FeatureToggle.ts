@@ -20,7 +20,7 @@ class FeatureToggle implements FeatureToggleClientInterface {
     }
 
     getFeatureVariable(featureKey: string, variableKey: string, userId: string, attributes?: Record<string, string>) {
-        return this.optimizelyClient.getFeatureVariable(featureKey, variableKey, userId);
+        return this.optimizelyClient.getFeatureVariable(featureKey, variableKey, userId, attributes);
     }
 
 }
