@@ -25,7 +25,7 @@ class FeatureToggle implements FeatureToggleClientInterface {
 
 }
 
-const getFeatureToggle = async (sdkKey: string) => {
+const getFeatureToggle = async (sdkKey: string): Promise<FeatureToggle>  => {
     const optimizelyClient = optimizely.createInstance({sdkKey: sdkKey});
 
     const {success, reason} = await optimizelyClient.onReady();
