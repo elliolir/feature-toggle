@@ -1,5 +1,7 @@
 import optimizely from '@optimizely/optimizely-sdk';
 
+import { IActivateABTest } from './interfaces';
+
 /*
     Abstraction over vendor's SDK in order to decouple them
  */
@@ -26,7 +28,7 @@ class FeatureToggle implements FeatureToggleClientInterface {
 }
 
 const getFeatureToggle = async (sdkKey: string): Promise<FeatureToggle>  => {
-    const optimizelyClient = optimizely.createInstance({sdkKey: sdkKey});
+    const optimizelyClient = optimizely.createInstance({sdkKey});
 
     const {success, reason} = await optimizelyClient.onReady();
 
@@ -38,5 +40,19 @@ const getFeatureToggle = async (sdkKey: string): Promise<FeatureToggle>  => {
     }
 }
 
+const activateABTest = ({
+    sdkKey, featureName, userId, controlCallback, treatmentCallback, defaultCallback
+}: IActivateABTest): void => {
+    const optimizelyClient = optimizely.createInstance({sdkKey});
+    const variation = optimizelyClient.activate(featureName, userId);
+    if (variation === 'control') {
+        controlCallback && controlCallback();
+    } else if (variation === 'treatment') {
+        treatmentCallback && treatmentCallback();
+    } else {
+        defaultCallback && defaultCallback();
+    }
+};
 
-export { FeatureToggleClientInterface, getFeatureToggle};
+
+export { FeatureToggleClientInterface, getFeatureToggle, activateABTest };
