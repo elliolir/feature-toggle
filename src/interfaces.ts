@@ -1,10 +1,15 @@
-export type Noop = () => void;
-
-export interface IActivateABTest {
-    sdkKey: string,
-    featureName: string,
+export interface BaseFeatureMethodProps {
+    featureKey: string,
     userId: string,
-    controlCallback?: Noop,
-    treatmentCallback?: Noop,
-    defaultCallback?: Noop
-};
+    attributes?: Record<string, string>
+}
+
+export interface GetFeatureVariableProps extends BaseFeatureMethodProps {
+    variableKey: string
+}
+
+export interface FeatureToggleClientInterface {
+    isFeatureEnabled(params: BaseFeatureMethodProps): void
+    getFeatureVariable(params: GetFeatureVariableProps): void
+    activateFeatureABTest(params: BaseFeatureMethodProps): string | null
+}
