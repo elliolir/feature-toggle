@@ -1,15 +1,5 @@
-export interface BaseFeatureMethodProps {
-    featureKey: string,
-    userId: string,
-    attributes?: Record<string, string>
-}
-
-export interface GetFeatureVariableProps extends BaseFeatureMethodProps {
-    variableKey: string
-}
-
 export interface FeatureToggleClientInterface {
-    isFeatureEnabled(params: BaseFeatureMethodProps): void
-    getFeatureVariable(params: GetFeatureVariableProps): void
-    activateFeatureABTest(params: BaseFeatureMethodProps): string | null
+    isFeatureEnabled(featureKey: string, userId: string, attributes?: Record<string, string>): void
+    getFeatureVariable(featureKey: string, variableKey: string, userId: string, attributes?: Record<string, string>): void
+    activateFeatureABTest(experimentKey: string, userId: string, attributes?: Record<string, string>): string | null
 }

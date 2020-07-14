@@ -1,6 +1,6 @@
 import optimizely from '@optimizely/optimizely-sdk';
 
-import { FeatureToggleClientInterface, BaseFeatureMethodProps, GetFeatureVariableProps } from './interfaces';
+import { FeatureToggleClientInterface } from './interfaces';
 
 class FeatureToggle implements FeatureToggleClientInterface {
     private readonly optimizelyClient: optimizely.Client;
@@ -9,16 +9,16 @@ class FeatureToggle implements FeatureToggleClientInterface {
         this.optimizelyClient = optimizelyClient;
     }
 
-    isFeatureEnabled({ featureKey, userId, attributes }: BaseFeatureMethodProps): boolean {
+    isFeatureEnabled(featureKey: string, userId: string, attributes?: Record<string, string>): boolean {
         return this.optimizelyClient.isFeatureEnabled(featureKey, userId, attributes);
     }
 
-    getFeatureVariable({ featureKey, variableKey, userId, attributes }: GetFeatureVariableProps) {
+    getFeatureVariable(featureKey: string, variableKey: string, userId: string, attributes?: Record<string, string>) {
         return this.optimizelyClient.getFeatureVariable(featureKey, variableKey, userId, attributes);
     }
 
-    activateFeatureABTest({ featureKey, userId, attributes }: BaseFeatureMethodProps): string | null {
-        return this.optimizelyClient.activate(featureKey, userId, attributes);
+    activateFeatureABTest(experimentKey: string, userId: string, attributes?: Record<string, string>): string | null {
+        return this.optimizelyClient.activate(experimentKey, userId, attributes);
     }
 
 }
