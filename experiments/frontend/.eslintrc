@@ -7,16 +7,6 @@
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
-  "overrides": [
-    {
-      "files": ["*.spec.*", "*.test.*"],
-      "rules": {
-        "max-len": 0,
-        "@typescript-eslint/no-explicit-any": 0,
-        "eslint-disable react/react-in-jsx-scope": 0
-      }
-    }
-  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
@@ -25,9 +15,8 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint", "jest"],
+  "plugins": ["react", "@typescript-eslint"],
   "extends": [
-    "plugin:jest/recommended",
     "plugin:react/recommended",
     "airbnb",
     "plugin:@typescript-eslint/eslint-recommended",
