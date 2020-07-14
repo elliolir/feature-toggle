@@ -6,11 +6,10 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "jsx": true,
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint"],
+  "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -19,7 +18,6 @@
     "prettier/@typescript-eslint"
   ],
   "rules": {
-    "react/jsx-filename-extension": [1, { "extensions": [".jsx", ".tsx"] }],
     "import/extensions": "off",
     "spaced-comment": [2, "always", { "markers": ["/"] }]
   }
