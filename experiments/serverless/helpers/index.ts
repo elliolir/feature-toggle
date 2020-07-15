@@ -1,4 +1,4 @@
-import {APIGatewayProxyResult} from "aws-lambda"
+import {APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult, Context} from "aws-lambda"
 
 const getResponse = (statusCode: number, body: unknown): APIGatewayProxyResult => ({
     statusCode,
@@ -9,4 +9,8 @@ const getResponse = (statusCode: number, body: unknown): APIGatewayProxyResult =
     )
 })
 
-export { getResponse }
+
+const enhanceLambda = (middleware: Function) => (lambda: APIGatewayProxyHandler) => (event:APIGatewayProxyEvent, context:Context) => middleware(event, context)(lambda);
+
+
+export { getResponse, enhanceLambda }

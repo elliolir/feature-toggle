@@ -1,12 +1,18 @@
-import "dotenv/config";
+import optimizely from "@optimizely/optimizely-sdk";
+import FeatureToggle from "./FeatureToggle";
+import { FeatureToggleClientInterface } from "./interfaces";
 
-const { SDK_KEY } = process.env;
+const getFeatureToggle = async (sdkKey: string): Promise<FeatureToggleClientInterface>  => {
+  const optimizelyClient = optimizely.createInstance({sdkKey});
 
-if (!SDK_KEY) {
-  throw new Error(
-    "Optimizely SDK key must be provided for the Feature Toggle to work."
-  );
+  const {success, reason} = await optimizelyClient.onReady();
+
+  if (!success) {
+    throw new Error(reason);
+  }
+  else {
+    return new FeatureToggle(optimizelyClient)
+  }
 }
 
-console.log("Hello");
-console.log(SDK_KEY);
+export { getFeatureToggle }
