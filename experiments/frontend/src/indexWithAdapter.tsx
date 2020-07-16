@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { getFeatureToggle } from 'adapter/FeatureToggle';
-import App from './App';
+import App from './AppWithAdapter';
 
 import './fonts/AvenirNext/AvenirNext-Medium.ttf';
 import './fonts/AvenirNext/AvenirNext-Bold.ttf';
