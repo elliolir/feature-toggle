@@ -1,10 +1,7 @@
 import React from 'react';
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  Redirect,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+
+import FeatureToggleRoute from 'common/FeatureToggleRoute';
 
 import LandingPage from 'pages/LandingPage/LandingPage';
 import Home from 'pages/Home/Home';
@@ -22,11 +19,9 @@ function App() {
     return (
       <Route
         {...rest}
-        render={(props) => (isAuthorized ? (
-          <Component {...props} />
-        ) : (
-          <Redirect to={{ pathname: '/' }} />
-        ))}
+        render={(props) =>
+          isAuthorized ? <Component {...props} /> : <Redirect to={{ pathname: '/' }} />
+        }
       />
     );
   };
@@ -38,8 +33,13 @@ function App() {
         <main>
           <Switch>
             <Route exact path="/" component={LandingPage} />
-            <Route exact path="/home" component={Home} />
-            <PrivateRoute exact path="/about" component={About} />
+            <FeatureToggleRoute exact path="/home" component={Home} feature="home_route" />
+            <FeatureToggleRoute
+              exact
+              path="/about"
+              component={() => <PrivateRoute exact path="/about" component={About} />}
+              feature="about_route"
+            />
             <Route path="*" component={PageNotFound} />
           </Switch>
         </main>
