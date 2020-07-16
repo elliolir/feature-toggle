@@ -13,12 +13,16 @@ class FeatureToggle implements FeatureToggleClientInterface {
         return this.optimizelyClient.isFeatureEnabled(featureKey, userId, attributes);
     }
 
-    getFeatureVariable(featureKey: string, variableKey: string, userId: string, attributes?: Record<string, string>) {
+    getFeatureVariable(featureKey: string, variableKey: string, userId: string, attributes?: Record<string, string>): unknown {
         return this.optimizelyClient.getFeatureVariable(featureKey, variableKey, userId, attributes);
     }
 
     activateFeatureABTest(experimentKey: string, userId: string, attributes?: Record<string, string>): string | null {
         return this.optimizelyClient.activate(experimentKey, userId, attributes);
+    }
+
+    trackEvent(eventKey: string, userId: string, attributes?: Record<string, string>, tags?: Record<string, string | number>): void {
+        return this.optimizelyClient.track(eventKey, userId, attributes, tags);
     }
 
 }
