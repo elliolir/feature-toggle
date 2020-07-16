@@ -15,6 +15,7 @@ import './index.css';
 const optimizely = createInstance({
   sdkKey: process.env.REACT_APP_SDK_KEY,
   datafileOptions: {
+    autoUpdate: true,
     updateInterval: Number(process.env.REACT_APP_FT_UPDATE),
   },
 });
