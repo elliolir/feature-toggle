@@ -1,23 +1,52 @@
 service:
-  name: serverless
+  name: feature-toggle
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
-
-custom:
-  webpack:
-    webpackConfig: ./webpack.config.js
-    includeModules: true
 
 # Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-plugin-aws-alerts
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  alerts:
+    dashboards: true
+
+    nameTemplate: $[functionName]-$[metricName]-Alarm # Optionally - naming template for alarms, can be overwritten in definitions
+    prefixTemplate: $[stackName] # Optionally - override the alarm name prefix
+
+    topics:
+      ok: ${self:service}-alerts-ok
+      alarm: ${self:service}-alerts-alarm
+      insufficientData: ${self:service}-alerts-insufficientData
+    definitions:  # these defaults are merged with your definitions
+      functionErrors:
+        period: 300 # override period
+      customAlarm:
+        description: 'Lambda Feature Alarm'
+        namespace: 'AWS/Lambda'
+        nameTemplate: $[functionName]-Duration-IMPORTANT-Alarm # Optionally - naming template for the alarms, overwrites globally defined one
+        prefixTemplate: $[stackName] # Optionally - override the alarm name prefix, overwrites globally defined one
+        metric: duration
+        threshold: 2
+        statistic: Average
+        period: 300
+        evaluationPeriods: 1
+        datapointsToAlarm: 1
+        comparisonOperator: GreaterThanOrEqualToThreshold
+    alarms:
+      - functionErrors
 
 provider:
   name: aws
   runtime: nodejs12.x
+  profile: default
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   environment:
@@ -27,6 +56,8 @@ provider:
 functions:
   main:
     handler: functions/index.handler
+    alarms: # merged with function alarms
+      - customAlarm
     events:
       - http:
           method: get
