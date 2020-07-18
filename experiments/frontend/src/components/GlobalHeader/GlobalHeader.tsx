@@ -3,6 +3,13 @@ import { Link } from 'react-router-dom';
 import { AppBar, Toolbar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
+import {
+  withOptimizely,
+  OptimizelyFeature,
+  OptimizelyExperiment,
+  OptimizelyVariation
+} from '@optimizely/react-sdk'
+
 import logoMain from 'themes/ecarsense/images/img-logo.svg';
 import Paths from 'paths';
 
@@ -37,26 +44,46 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const GlobalHeader: React.FC = () => {
+const GlobalHeader: React.FC = (props: any) => {
   const classes = useStyles();
 
-  return !isAuthorized ? null : (
-    <AppBar position="fixed" className={classes.appBar}>
-      <Toolbar>
-        <Link to={Paths.landingPage}>
-          <img
-            className={classes.logoMain}
-            src={logoMain}
-            alt="eCarSense"
-            data-testid="Logo"
-          />
-        </Link>
-        <div className={classes.grow} />
-        <Link to={Paths.home}>Home</Link>
-        <div className={classes.grow} />
-        <Link to={Paths.about}>About</Link>
-      </Toolbar>
-    </AppBar>
-  );
+  const trackEvent = (name: string): void => {
+    const { optimizely } = props
+    optimizely.track(name);
+  }
+
+  return isAuthorized ? null : 
+    <OptimizelyFeature feature="global_header_feature">
+      {(isEnabled, { alt }) => {
+        return (
+          isEnabled
+            ? <AppBar position="fixed" className={classes.appBar}>
+                <Toolbar>
+                  <Link to={Paths.landingPage}>
+                    <img
+                      className={classes.logoMain}
+                      src={logoMain}
+                      alt={String(alt)}
+                      data-testid="Logo"
+                  />
+                  </Link>
+                </Toolbar>
+                <OptimizelyExperiment experiment="nav">
+                  <OptimizelyVariation variation="home">
+                    <div className={classes.grow} />
+                      <Link to={Paths.home} onClick={() => trackEvent('chooseHome')}>Home</Link>
+                    <div className={classes.grow} />
+                  </OptimizelyVariation>
+                  <OptimizelyVariation variation="about">
+                    <Link to={Paths.about} onClick={() => trackEvent('chooseAbout')}>About</Link>
+                  </OptimizelyVariation>
+                </OptimizelyExperiment>
+              </AppBar>
+            : null
+          )
+      }
+      }
+      </OptimizelyFeature>
+    ;
 };
-export default GlobalHeader;
+export default withOptimizely(GlobalHeader);
