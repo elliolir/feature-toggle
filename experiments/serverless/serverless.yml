@@ -23,6 +23,7 @@ provider:
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     SDK_KEY: ${env:SDK_KEY}
+    API_KEY: ${env:API_KEY}
 
 functions:
   main:
@@ -31,3 +32,9 @@ functions:
       - http:
           method: get
           path: "/"
+  featureKiller:
+    handler: functions/featureKiller/index.handler
+    events:
+      - http:
+          method: patch
+          path: "/feature"
