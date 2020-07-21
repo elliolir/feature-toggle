@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-import { IPayload, IFeatureKillerResult } from './interface';
-import { API_KEY, ROLLOUT_TRAFFIC } from './constants';
+import { API_KEY, API_URL, ROLLOUT_TRAFFIC } from '../../utils/constants';
+import { IFeature } from '../../utils/interfaces';
+
+import { IPayload } from './interface';
 
 const patchPayload: IPayload = {
   environments: {
@@ -26,10 +28,10 @@ const patchPayload: IPayload = {
   },
 };
 
-const patchFeature = async (featureId: number): Promise<IFeatureKillerResult> => {
+const patchFeature = async (featureId: number): Promise<IFeature> => {
   const { data } = await axios({
     method: 'PATCH',
-    url: `https://api.optimizely.com/v2/features/${featureId}`,
+    url: `${API_URL}/v2/features/${featureId}`,
     data: patchPayload,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
