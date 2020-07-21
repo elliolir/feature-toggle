@@ -4,6 +4,7 @@ import { API_KEY, API_URL, ROLLOUT_TRAFFIC } from '../../utils/constants';
 import { IFeature } from '../../utils/interfaces';
 
 import { IPayload } from './interface';
+import {APIGatewayEvent, SNSEvent} from "aws-lambda";
 
 const patchPayload: IPayload = {
   environments: {
@@ -41,4 +42,8 @@ const patchFeature = async (featureId: number): Promise<IFeature> => {
   return data;
 };
 
-export { patchFeature };
+const isAPIGatewayEvent = (event: APIGatewayEvent | SNSEvent): event is APIGatewayEvent => {
+  return !!(<APIGatewayEvent>event).body;
+}
+
+export { patchFeature, isAPIGatewayEvent };

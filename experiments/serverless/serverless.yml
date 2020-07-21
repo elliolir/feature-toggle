@@ -1,19 +1,29 @@
 service:
-  name: serverless
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+  name: feature-toggle-experiments
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dotenv-plugin
+  - serverless-plugin-aws-alerts
+
 
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
-
-# Add the serverless-webpack plugin
-plugins:
-  - serverless-webpack
-  - serverless-offline
-  - serverless-dotenv-plugin
+    alerts:
+      dashboards: true
+      nameTemplate: $[functionName]-$[metricName]-Alarm
+      prefixTemplate: $[stackName]
+      topics:
+        alarm:
+          topic: ${self:service}-alerts-alarm
+          notifications:
+            - protocol: lambda
+              endpoint: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-feature-killer
+      alarms:
+        - functionErrors
 
 provider:
   name: aws
@@ -32,9 +42,21 @@ functions:
       - http:
           method: get
           path: "/"
-  featureKiller:
+    alarms:
+      - customAlarm
+  feature-killer:
     handler: functions/featureKiller/index.handler
     events:
       - http:
           method: patch
           path: "/feature"
+      - sns:
+          arn: !Ref FeatureErrorsAlarm
+          topicName: ${self:service}-feature-errors-alarm
+
+resources:
+  Resources:
+    FeatureErrorsAlarm:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:service}-feature-errors-alarm
