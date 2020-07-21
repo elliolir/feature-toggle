@@ -23,6 +23,6 @@ export const handler = async (event: APIGatewayEvent | SNSEvent): Promise<APIGat
   }
   else {
     console.log("TRIGGERED_BY_SNS");
-    console.log(event);
+    console.log(JSON.stringify(event, null, 2));
   }
 };
