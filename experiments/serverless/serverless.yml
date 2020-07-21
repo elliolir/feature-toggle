@@ -6,24 +6,24 @@ plugins:
   - serverless-offline
   - serverless-dotenv-plugin
   - serverless-plugin-aws-alerts
-
+  - serverless-pseudo-parameters
 
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
-    alerts:
-      dashboards: true
-      nameTemplate: $[functionName]-$[metricName]-Alarm
-      prefixTemplate: $[stackName]
-      topics:
-        alarm:
-          topic: ${self:service}-alerts-alarm
-          notifications:
-            - protocol: lambda
-              endpoint: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-feature-killer
-      alarms:
-        - functionErrors
+  alerts:
+    dashboards: true
+    nameTemplate: $[functionName]-$[metricName]-Alarm
+    prefixTemplate: $[stackName]
+    topics:
+      alarm:
+        topic: arn:aws:sns:${self:provider.region}:#{AWS::AccountId}:${self:service}-feature-errors-alarm
+        notifications:
+          - protocol: lambda
+            endpoint: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-feature-killer
+    alarms:
+      - functionErrors
 
 provider:
   name: aws
@@ -34,6 +34,7 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     SDK_KEY: ${env:SDK_KEY}
     API_KEY: ${env:API_KEY}
+    FEATURE_NAME: ${env:FEATURE_NAME}
 
 functions:
   main:
@@ -43,7 +44,7 @@ functions:
           method: get
           path: "/"
     alarms:
-      - customAlarm
+      - functionErrors
   feature-killer:
     handler: functions/featureKiller/index.handler
     events:
