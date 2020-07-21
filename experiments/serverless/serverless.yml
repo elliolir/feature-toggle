@@ -10,6 +10,7 @@ plugins:
   - serverless-offline
   - serverless-dotenv-plugin
   - serverless-plugin-aws-alerts
+  - serverless-pseudo-parameters
 
 custom:
   webpack:
@@ -17,14 +18,14 @@ custom:
     includeModules: true
   alerts:
     dashboards: true
-
     nameTemplate: $[functionName]-$[metricName]-Alarm # Optionally - naming template for alarms, can be overwritten in definitions
     prefixTemplate: $[stackName] # Optionally - override the alarm name prefix
-
     topics:
-      ok: ${self:service}-alerts-ok
-      alarm: ${self:service}-alerts-alarm
-      insufficientData: ${self:service}-alerts-insufficientData
+      alarm:
+        topic: ${self:service}-alerts-alarm
+        notifications:
+          - protocol: lambda
+            endpoint: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-feature-killer
     definitions:  # these defaults are merged with your definitions
       functionErrors:
         period: 300 # override period
@@ -52,6 +53,11 @@ provider:
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     SDK_KEY: ${env:SDK_KEY}
+  iamRoleStatements: # permissions for all of your functions can be set here
+    - Effect: Allow
+      Action: # Gives permission to DynamoDB tables in a specific region
+        - dynamodb:DescribeTable
+      Resource: 'arn:aws:dynamodb:us-east-1:*:*'
 
 functions:
   main:
@@ -62,3 +68,7 @@ functions:
       - http:
           method: get
           path: "/"
+  feature-killer:
+    handler: functions/featureKiller.handler
+    events:
+      - sns: 'feature-toggle-alerts-alarm'
