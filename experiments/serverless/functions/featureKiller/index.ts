@@ -1,28 +1,21 @@
-import {APIGatewayProxyResult, APIGatewayEvent, SNSEvent} from 'aws-lambda';
+import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 
 import { getResponse } from '../../helpers';
-import getFeatureIdFromKey from '../../utils/getFeatureIdFromKey';
-import { IFeature } from '../../utils/interfaces';
+import { IFeature, IFeatureKiller } from '../../utils/interfaces';
 
 import { patchFeature, isAPIGatewayEvent } from './helpers';
-import { IFeatureKiller } from './interface';
 
-export const handler = async (event: APIGatewayEvent | SNSEvent): Promise<APIGatewayProxyResult | void> => {
-  if (isAPIGatewayEvent(event) ) {
-    console.log('Body: ', event.body);
+export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+  console.info('Event: ', event);
 
-    const { featureId }: IFeatureKiller = JSON.parse(event.body);
-    console.log('Feature ID: ', featureId);
+  const { featureId, featureKey }: IFeatureKiller = isAPIGatewayEvent(event)
+    ? JSON.parse(event.body)
+    : event;
+  console.info('Feature Key: ', featureKey);
+  console.info('Feature Id: ', featureId);
 
-    const feature = await getFeatureIdFromKey('home_route');
-    console.log('Feature: ', feature);
+  const data: IFeature = await patchFeature(featureId);
+  console.info('Feature Data: ', data);
 
-    const data: IFeature = await patchFeature(featureId);
-
-    return getResponse(200, data);
-  }
-  else {
-    console.log("TRIGGERED_BY_SNS");
-    console.log(JSON.stringify(event, null, 2));
-  }
+  return getResponse(200, data);
 };

@@ -1,32 +1,44 @@
-import {APIGatewayProxyEvent, APIGatewayProxyHandler, Context, Callback, APIGatewayProxyResult} from "aws-lambda";
-import {getFeatureToggle} from "../../../src";
-import {getResponse} from "../helpers";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyHandler,
+  Context,
+  Callback,
+  APIGatewayProxyResult,
+} from 'aws-lambda';
 
-const featureToggleWrapper = (SDK_KEY: string, featureName: string) =>
-  (lambdaHandler: APIGatewayProxyHandler) =>
-    async (event: APIGatewayProxyEvent, context: Context, callback: Callback<APIGatewayProxyResult>): Promise<APIGatewayProxyResult | never | void> => {
-  console.log(event);
+import { getFeatureToggle } from '../../../src';
 
-  if (!SDK_KEY || !featureName) {
-    throw new Error("Please provide feature name and SDK key");
+import { getResponse } from '../helpers';
+
+import { FEATURE_ERROR_PATTERN } from './constants';
+
+const featureToggleWrapper = (SDK_KEY: string, featureKey: string) => (
+  lambdaHandler: APIGatewayProxyHandler,
+) => async (
+  event: APIGatewayProxyEvent,
+  context: Context,
+  callback: Callback<APIGatewayProxyResult>,
+): Promise<APIGatewayProxyResult | never | void> => {
+  console.info('Event: ', event);
+
+  if (!SDK_KEY || !featureKey) {
+    throw new Error('Please provide feature key and SDK key');
   }
 
   const featureToggleClient = await getFeatureToggle(SDK_KEY);
 
-  if (featureToggleClient.isFeatureEnabled(featureName, "3456798765")) {
+  const featureEnabled = featureToggleClient.isFeatureEnabled(featureKey, 'dmitry');
+
+  if (featureEnabled) {
     try {
-      return lambdaHandler(event, context, callback);
-    }
-    catch(error) {
-      console.error("FEATURE_ERROR:", featureName);
-      console.error("FEATURE_ERROR_PAYLOAD:", JSON.stringify(error, null, 2));
+      return await lambdaHandler(event, context, callback);
+    } catch (error) {
+      console.error(`${FEATURE_ERROR_PATTERN}: ${featureKey}`);
       throw error; // TODO investigate other options of triggering cloudwatch errors
     }
-
+  } else {
+    return getResponse(404, { message: 'Not found' });
   }
-  else {
-    return getResponse(404, {message: "Not found"})
-  }
-}
+};
 
 export default featureToggleWrapper;

@@ -38,4 +38,9 @@ interface IFeaturesMap {
   [key: string]: number;
 }
 
-export { IRolloutRule, IEnvironments, IFeature, FeaturesList, IFeaturesMap };
+interface IFeatureKiller {
+  featureKey?: string;
+  featureId: number;
+}
+
+export { IRolloutRule, IEnvironments, IFeature, FeaturesList, IFeaturesMap, IFeatureKiller };

@@ -18,13 +18,13 @@ const listFeatures = async (): Promise<FeaturesList> => {
 
 const getFeaturesMap = async (): Promise<IFeaturesMap> => {
   const featuresList: FeaturesList = await listFeatures();
-  console.log('Features List: ', featuresList);
+  console.info('Features List: ', featuresList);
 
   const featuresMap = featuresList.reduce((acc, curr) => {
     acc[curr.key] = curr.id;
     return acc;
   }, {});
-  console.log('Features Map: ', featuresMap);
+  console.info('Features Map: ', featuresMap);
 
   return featuresMap;
 };
