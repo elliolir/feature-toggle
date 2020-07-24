@@ -1,5 +1,5 @@
 service:
-  name: feature-toggle-experiments
+  name: feature-toggle-experiments-bunyan
 
 plugins:
   - serverless-webpack
@@ -97,3 +97,6 @@ resources:
                     - logs:PutLogEvents
                     - logs:FilterLogEvents
                   Resource: arn:aws:logs:${self:provider.region}:#{AWS::AccountId}:log-group:/aws/lambda/*:*:*
+
+package:
+  individually: true

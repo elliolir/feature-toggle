@@ -1,21 +1,25 @@
-import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
+import { APIGatewayProxyResult, APIGatewayEvent, Context } from 'aws-lambda';
 
 import { getResponse } from '../../helpers';
 import { IFeature, IFeatureKiller } from '../../utils/interfaces';
+import logger from '../../utils/logger';
 
 import { patchFeature, isAPIGatewayEvent } from './helpers';
 
-export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-  console.info('Event: ', event);
+export const handler = async (
+  event: APIGatewayEvent,
+  context: Context,
+): Promise<APIGatewayProxyResult> => {
+  logger.info({ payload: event, requestId: context.awsRequestId }, 'Event');
 
   const { featureId, featureKey }: IFeatureKiller = isAPIGatewayEvent(event)
     ? JSON.parse(event.body)
     : event;
-  console.info('Feature Key: ', featureKey);
-  console.info('Feature Id: ', featureId);
+  logger.info({ payload: featureKey }, 'Feature Key');
+  logger.info({ payload: featureId }, 'Feature Id');
 
   const data: IFeature = await patchFeature(featureId);
-  console.info('Feature Data: ', data);
+  logger.info({ payload: data }, 'Feature Data');
 
   return getResponse(200, data);
 };

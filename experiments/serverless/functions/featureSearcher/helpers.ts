@@ -4,6 +4,7 @@ import { Lambda, CloudWatchLogs } from 'aws-sdk';
 import { FEATURE_ERROR_PATTERN, FEATURE_ERROR_REGEX } from '../../utils/constants';
 import getFeatureIdFromKey from '../../utils/getFeatureIdFromKey';
 import { IFeatureKiller } from '../../utils/interfaces';
+import logger from '../../utils/logger';
 
 const lambda = new Lambda({
   region: process.env.AWS_REGION,
@@ -14,7 +15,7 @@ const getErrorSource = (event: SNSEvent): string => {
   const { Sns }: { Sns: SNSMessage } = event.Records[0];
 
   const snsMessage = JSON.parse(Sns.Message);
-  console.info('Message: ', snsMessage);
+  logger.debug({ payload: snsMessage }, 'Sns Message');
 
   const { value } = snsMessage.Trigger.Dimensions[0];
 
@@ -28,22 +29,21 @@ const findFeatureKey = async (errorSource: string): Promise<string> => {
   };
 
   const featureLogs = await logs.filterLogEvents(logParams).promise();
-  console.info('Feature Logs: ', featureLogs);
+  logger.debug({ payload: featureLogs }, 'Feature Logs');
 
   const featureMessage: CloudWatchLogs.FilteredLogEvent = featureLogs.events.pop();
-  console.info('Feature Message: ', featureMessage);
+  logger.debug({ payload: featureMessage }, 'Feature Message');
 
-  const featureKey: string = featureMessage.message
-    .match(FEATURE_ERROR_REGEX)[1]
-    .replace(/(\r\n|\n|\r)/gm, '')
-    .trim()
+  const featureKey: string = JSON.parse(featureMessage.message)
+    .msg.match(FEATURE_ERROR_REGEX)[1]
+    .trim();
 
   return featureKey;
 };
 
 const getFeatureKillerPayload = async (featureKey: string): Promise<IFeatureKiller> => {
   const featureId: number = await getFeatureIdFromKey(featureKey);
-  console.info('Feature Id: ', featureId);
+  logger.debug({ payload: featureId }, 'Feature Id');
 
   const featureKillerPayload: IFeatureKiller = {
     featureKey,

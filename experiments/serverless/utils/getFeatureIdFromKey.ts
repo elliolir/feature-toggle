@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { API_KEY, API_URL, PROJECT_ID } from '../utils/constants';
+import logger from '../utils/logger';
 
 import { FeaturesList, IFeaturesMap } from './interfaces';
 
@@ -18,13 +19,13 @@ const listFeatures = async (): Promise<FeaturesList> => {
 
 const getFeaturesMap = async (): Promise<IFeaturesMap> => {
   const featuresList: FeaturesList = await listFeatures();
-  console.info('Features List: ', featuresList);
+  logger.debug({ payload: featuresList }, 'Features List');
 
   const featuresMap = featuresList.reduce((acc, curr) => {
     acc[curr.key] = curr.id;
     return acc;
   }, {});
-  console.info('Features Map: ', featuresMap);
+  logger.debug({ payload: featuresMap }, 'Features Map');
 
   return featuresMap;
 };

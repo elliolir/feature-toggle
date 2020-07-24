@@ -8,6 +8,7 @@ import {
 
 import { getFeatureToggle } from '../../../src';
 
+import logger from '../utils/logger';
 import { getResponse } from '../helpers';
 
 import { FEATURE_ERROR_PATTERN } from './constants';
@@ -19,9 +20,8 @@ const featureToggleWrapper = (SDK_KEY: string, featureKey: string) => (
   context: Context,
   callback: Callback<APIGatewayProxyResult>,
 ): Promise<APIGatewayProxyResult | never | void> => {
-  console.info('Event: ', event);
-
   if (!SDK_KEY || !featureKey) {
+    logger.error('Please provide feature key and SDK key');
     throw new Error('Please provide feature key and SDK key');
   }
 
@@ -33,7 +33,7 @@ const featureToggleWrapper = (SDK_KEY: string, featureKey: string) => (
     try {
       return await lambdaHandler(event, context, callback);
     } catch (error) {
-      console.error(`${FEATURE_ERROR_PATTERN}: ${featureKey}`);
+      logger.error(`${FEATURE_ERROR_PATTERN}: ${featureKey}`);
       throw error; // TODO investigate other options of triggering cloudwatch errors
     }
   } else {
