@@ -1,19 +1,27 @@
 service:
-  name: serverless
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+  name: feature-toggle-experiments
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dotenv-plugin
+  - serverless-plugin-aws-alerts
+  - serverless-pseudo-parameters
 
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
-
-# Add the serverless-webpack plugin
-plugins:
-  - serverless-webpack
-  - serverless-offline
-  - serverless-dotenv-plugin
+  alerts:
+    dashboards: true
+    nameTemplate: $[functionName]-$[metricName]-Alarm
+    prefixTemplate: $[stackName]
+    topics:
+      alarm:
+        topic: arn:aws:sns:${self:provider.region}:#{AWS::AccountId}:${self:service}-feature-errors-alarm
+        notifications:
+          - protocol: lambda
+            endpoint: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-feature-searcher
 
 provider:
   name: aws
@@ -24,6 +32,7 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     SDK_KEY: ${env:SDK_KEY}
     API_KEY: ${env:API_KEY}
+    FEATURE_KEY: ${env:FEATURE_KEY}
 
 functions:
   main:
@@ -31,10 +40,60 @@ functions:
     events:
       - http:
           method: get
-          path: "/"
-  featureKiller:
+          path: '/'
+    alarms:
+      - name: functionErrors
+        threshold: 1
+
+  feature-searcher:
+    handler: functions/featureSearcher/index.handler
+    role: FeatureSearcherRole
+    environment:
+      FEATURE_KILLER: ${self:service}-${self:provider.stage}-feature-killer
+    events:
+      - sns:
+          arn: !Ref FeatureErrorsAlarm
+          topicName: ${self:service}-feature-errors-alarm
+
+  feature-killer:
     handler: functions/featureKiller/index.handler
     events:
       - http:
           method: patch
-          path: "/feature"
+          path: '/feature'
+
+resources:
+  Resources:
+    FeatureErrorsAlarm:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:service}-feature-errors-alarm
+
+    FeatureSearcherRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: FeatureSearcherRole
+        Description: Allows access to CloudWatch Logs and ability to call Feature Killer Lambda
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Policies:
+          - PolicyName: FeatureSearcher-policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action: lambda:InvokeFunction
+                  Resource: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-feature-killer
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                    - logs:FilterLogEvents
+                  Resource: arn:aws:logs:${self:provider.region}:#{AWS::AccountId}:log-group:/aws/lambda/*:*:*

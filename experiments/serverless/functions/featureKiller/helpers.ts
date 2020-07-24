@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { APIGatewayEvent } from 'aws-lambda';
 
 import { API_KEY, API_URL, ROLLOUT_TRAFFIC } from '../../utils/constants';
-import { IFeature } from '../../utils/interfaces';
+import { IFeature, IFeatureKiller } from '../../utils/interfaces';
 
 import { IPayload } from './interface';
 
@@ -41,4 +42,8 @@ const patchFeature = async (featureId: number): Promise<IFeature> => {
   return data;
 };
 
-export { patchFeature };
+const isAPIGatewayEvent = (event: APIGatewayEvent | IFeatureKiller): boolean => {
+  return !!(<APIGatewayEvent>event).body;
+};
+
+export { patchFeature, isAPIGatewayEvent };
