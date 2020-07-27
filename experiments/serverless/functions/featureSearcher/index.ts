@@ -1,4 +1,6 @@
-import { SNSEvent } from 'aws-lambda';
+import { SNSEvent, Context } from 'aws-lambda';
+
+import logger from '../../utils/logger';
 
 import {
   getErrorSource,
@@ -7,18 +9,18 @@ import {
   triggerFeatureKill,
 } from './helpers';
 
-export const handler = async (event: SNSEvent): Promise<void> => {
-  console.info('SNS Event: ', JSON.stringify(event, null, 2));
+export const handler = async (event: SNSEvent, context: Context): Promise<void> => {
+  logger.info({ payload: event, requestId: context.awsRequestId }, 'Event');
 
   const errorSource = getErrorSource(event);
-  console.info('Error Source: ', errorSource);
+  logger.info({ payload: errorSource }, 'Error Source');
 
   const featureKey = await findFeatureKey(errorSource);
-  console.info('Feature Key: ', featureKey);
+  logger.info({ payload: featureKey }, 'Feature Key');
 
   const featureKillerPayload = await getFeatureKillerPayload(featureKey);
-  console.info('Feature Killer Payload: ', featureKillerPayload);
+  logger.info({ payload: featureKillerPayload }, 'Feature Killer Payload');
 
   const result = await triggerFeatureKill(featureKillerPayload);
-  console.info('Result: ', result);
+  logger.info({ payload: result }, 'Result');
 };
